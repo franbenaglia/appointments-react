@@ -1,8 +1,10 @@
+import { getAvailableRangeTurns } from "../api/TurnsApi";
 import { AvailableRangeTurns } from "../model/availablerangeturns";
 
-export const init = () => getAvailableRangeTurns().subscribe(es => {
+export const init = async () => {
+    const es = await getAvailableRangeTurns();
     setEvents(es);
-});
+};
 
 const event: Array<AvailableRangeTurns> = [];
 
