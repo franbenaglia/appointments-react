@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './TurnEdit.css';
 import { User } from '../model/user';
 import {
@@ -7,26 +7,28 @@ import {
   IonSelectOption
 } from '@ionic/react';
 import { IonSelectCustomEvent } from '@ionic/core';
-import { addTurn, getAllEvents, getAvailableTurnsTimes, getAvailableTurnsWithSelectedDates } from '../api/TurnsApi';
+import { addTurn, getAllEvents, getAvailableTurnsTimes, getAvailableTurnsWithSelectedDates, getTurnById } from '../api/TurnsApi';
 import { AvailableDates } from '../model/availabledates';
 import { getUser } from '../api/UserApi';
-import { getTheEvent, setTheEvent } from '../helpers/AppHelper';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Turn } from '../model/turn';
-import { lastValueFrom } from 'rxjs';
+import { AppContext, AppContextI } from '../context/AppContext';
 
 interface ContainerProps {
-  name: string;
+  id: string;
 }
 
-const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
+const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
 
   const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm<Turn>();
+
+  const { setEv, ev } = useContext<AppContextI>(AppContext);
 
   const [user, setUser] = useState<User>({} as User);
   const [message, setMessage] = useState('');
   const [currentDate, setCurrentDate] = useState<any>(null);
   const [currentTime, setCurrenTime] = useState<any>(null);
+  const [timeSelected, setTimeSelected] = useState<string>('');
   const [showTime, setShowTime] = useState(false);
   const [enableDate, setEnableDate] = useState(true);
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -41,7 +43,6 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
   const [minuteValues, setMinuteValues] = useState<number[]>([]);
   const [timeFree, setTimeFree] = useState<string[]>([]);
   const [events, setEvents] = useState<string[]>([]);
-  const [theevent, setTheevent] = useState('');
   const [isToastOpen, setIsToastOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -50,17 +51,13 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
   const init = async () => {
 
-    const ev: string[] = await getAllEvents();
-    setEvents(events);
+    const eve: string[] = await getAllEvents();
+    setEvents(eve);
 
     const us: User = await getUser();
     setUser(us);
 
-    const e = await lastValueFrom(getTheEvent());
-
-    setTheevent(e);
-
-    const av: AvailableDates = await getAvailableTurnsWithSelectedDates(e);
+    const av: AvailableDates = await getAvailableTurnsWithSelectedDates(ev);
 
     setDayValues(av.range[0].dayValues);
     setMinDate(av.range[0].minDate);
@@ -74,16 +71,18 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
     setCurrentDate(new Date().toISOString());
 
-    load();
+    if (id) {
+      fetchTurn();
+    }
 
   }
 
-  const load = async () => {
-    //setValue('firstName', user.firstName);
-    //setValue('lastName', user.lastName);
-    //setValue('email', user.email);
-    //setValue('phone', user.phone);
+  const fetchTurn = async () => {
+    const data : Turn = await getTurnById(id);
+    setValue('date', data.date);
+    setValue('event', data.event);
   }
+
 
   const datetime = useRef<null | HTMLIonDatetimeElement>(null);
 
@@ -99,16 +98,24 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
     datetime.current?.confirm();
   };
 
-
   const onSubmit: SubmitHandler<Turn> = async (turn) => {
+
+    turn.user = user;
+    turn.event = ev;
+
+    let sdate: string | string[] = datetime.current?.value;
+    let stime = timeSelected;
+
+    let stimedate = convertDateTime(sdate as string, stime);
+
+    turn.date = new Date(stimedate);
 
     await addTurn(turn);
 
   }
 
   const setEvent = ($event: any) => {
-    setTheEvent($event.detail.value);
-    setTheevent($event.detail.value);
+    setEv($event.detail.value);
   }
 
   const setOpen = (isOpen: boolean) => {
@@ -121,6 +128,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
 
   const settimevalues = ($event: IonSelectCustomEvent<SelectChangeEventDetail<any>>) => {
+    setTimeSelected($event.detail.value)
   }
 
   const dateAvailable = (dateString: string): Boolean => !selectedDays.includes(dateString);
@@ -138,6 +146,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
     let days: number[] = specificdays.map(s => Math.abs(+s.substring(7)))
     dayValues.push(...days);
+    setDayValues(dayValues);
     excludingDays(days); //workaround
 
   }
@@ -169,6 +178,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
       return specificdays.indexOf(d) === -1;
     });
     invalidDays.push(...notValidDates);
+    setInvalidDays(invalidDays);
   }
 
   const convertDateTime = (sdate: string, stime: string): string => {
@@ -183,9 +193,9 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
   const handleChange = async () => {
 
-    let sdate: string = '';
+    let sdate: string | string[] = datetime.current?.value;
 
-    const av: AvailableDates = await getAvailableTurnsTimes(theevent, sdate);
+    const av: AvailableDates = await getAvailableTurnsTimes(ev, sdate as string);
 
     setHourValues(av.range[0].hourValues);
     setMinuteValues(av.range[0].minuteValues);
@@ -215,32 +225,34 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
 
           <IonItem>
-            <IonLabel>Event name: {theevent}</IonLabel>
-            <IonSelect aria-label="Events" placeholder="Select the event"
-              onIonChange={($event) => setEvent($event)}>
+            <IonLabel>Event name: {ev}</IonLabel>
+            {!ev ? (
+              <IonSelect aria-label="Events" placeholder="Select the event"
+                onIonChange={($event) => setEvent($event)}>
 
-              {events.map((ev, i) =>
-                <IonSelectOption value={ev}>{ev}</IonSelectOption>
-              )
-              }
+                {events.map((ev, i) =>
+                  <IonSelectOption value={ev}>{ev}</IonSelectOption>
+                )
+                }
 
-            </IonSelect>
+              </IonSelect>
+            ) : ''}
           </IonItem >
 
 
           <IonItem>
             <IonInput readonly={true} label="First Name"
-              placeholder="Enter name"></IonInput>
+              placeholder="Enter name" value={user.firstName}></IonInput>
           </IonItem >
 
           <IonItem>
             <IonInput readonly={true} label="Last Name"
-              placeholder="Enter last name"></IonInput>
+              placeholder="Enter last name" value={user.lastName}></IonInput>
           </IonItem >
 
           <IonItem>
             <IonInput readonly={true} label="Email" type="email"
-              placeholder="email@domain.com"></IonInput>
+              placeholder="email@domain.com" value={user.email}></IonInput>
           </IonItem >
 
           <IonItem>
@@ -253,9 +265,10 @@ const TurnEdit: React.FC<ContainerProps> = ({ name }) => {
 
           <IonItem>
 
-            <IonDatetime id="datetime" presentation='date' dayValues={dayValues}
-              isDateEnabled={isDateEnabled} min={minDate} value={currentDate} onIonChange={() => handleChange()}
-              onIonCancel={() => handleCancel()} max={maxDate} display-format="DD/MM/YYYY"
+            <IonDatetime id="datetime" presentation='date' dayValues={dayValues} ref={datetime}
+              isDateEnabled={isDateEnabled} min={minDate} max={maxDate} value={currentDate}
+              onIonChange={() => handleChange()}
+              onIonCancel={() => handleCancel()} display-format="DD/MM/YYYY"
               firstDayOfWeek={1}>
               <span slot="title">Select a Reservation Date</span>
               <IonButtons slot="buttons">

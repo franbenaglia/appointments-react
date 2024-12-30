@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './ExploreContainer.css';
 import { Turn } from '../model/turn';
 import { User } from '../model/user';
@@ -7,10 +7,14 @@ import { getUser } from '../api/UserApi';
 import { Email } from '../model/email';
 import { sendEmail } from '../api/EmailApi';
 import { IonButton, IonItem, IonLabel } from '@ionic/react';
+import StripeComponent from './Stripe';
+import { AppContext, AppContextI } from '../context/AppContext';
 
 interface ContainerProps {
   _id: string;
 }
+
+const turnPrice: number = 10;
 
 const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
@@ -20,6 +24,8 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
   const [user, setUser] = useState<User>({} as User);
 
+  const { setIdTurn } = useContext<AppContextI>(AppContext);
+
   useEffect(() => {
     init();
   }, []);
@@ -28,9 +34,11 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
     const t = await getTurnById(_id);
 
+    setIdTurn(_id);
+
     setTurn(t);
 
-    if (t.cancelAdmin || t.cancelUser) {
+    if (t.cancelAdmin || t.cancelUser || t.idTx) {
       setCancelDisabled(true);
     }
 
@@ -95,7 +103,12 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
         </IonLabel>
       </IonItem>
       <IonItem>
-        <app-payment></app-payment>
+        <IonLabel class="ion-text-wrap">
+          {'Tx: ' + turn.idTx}
+        </IonLabel>
+      </IonItem>
+      <IonItem>
+        <StripeComponent price={turnPrice} />
       </IonItem>
       <IonButton disabled={cancelDisabled} color="danger" onClick={() => cancel()}>Cancelar</IonButton>
     </div >

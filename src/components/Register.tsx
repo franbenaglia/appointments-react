@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { User } from '../model/user';
 import { registerUser } from '../api/AuthApi';
 import { IonInput, IonItem, IonLabel, IonList, IonToast, IonListHeader, IonButton, IonText } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 
 
 const Register: React.FC = () => {
@@ -11,6 +12,8 @@ const Register: React.FC = () => {
     const [isToastOpen, setIsToastOpen] = useState(false);
     const [message, setMessage] = useState('');
     const interval: number = 4500;
+
+    const history = useHistory();
 
     const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm<User>();
 
@@ -27,12 +30,12 @@ const Register: React.FC = () => {
         setOpen(true);
         setMessage('Success! Registration accepted.');
 
-        /*
+
         let timerId = setInterval(() => {
             clearInterval(timerId);
-            router.navigate((['login']));
+            history.push('/Login')
         }, interval);
-*/
+
 
         //setOpen(true);
         //setMessage('Submit fail');

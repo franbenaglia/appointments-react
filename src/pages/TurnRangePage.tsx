@@ -5,7 +5,7 @@ import TurnRange from '../components/TurnRange';
 
 const TurnRangePage: React.FC = () => {
 
-    const { name } = useParams<{ name: string; }>();
+    const { id } = useParams<{ id: string; }>();
 
     return (
         <IonPage>
@@ -24,7 +24,7 @@ const TurnRangePage: React.FC = () => {
                         <IonTitle size="large">Turn Range</IonTitle>
                     </IonToolbar>
                 </IonHeader>
-                <TurnRange />
+                <TurnRange id={id} />
             </IonContent>
         </IonPage>
     );

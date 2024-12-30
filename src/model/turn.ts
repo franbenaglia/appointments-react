@@ -10,6 +10,7 @@ export class Turn {
     public cancelUser : Boolean;
     public cancelAdmin : Boolean;
     public event: string;
+    public idTx: string;
 
 }
 

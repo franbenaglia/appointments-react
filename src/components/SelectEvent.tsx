@@ -1,31 +1,43 @@
-import { IonItem, IonList, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonItem, IonList, IonSelect, IonSelectOption, IonText } from '@ionic/react';
 import { setTheEvent } from '../helpers/AppHelper';
-import { getEvents } from '../helpers/EventHelper';
 import './SelectEvent.css';
+import { useContext, useEffect, useState } from 'react';
+import { getAllEvents } from '../api/TurnsApi';
+import { AppContext, AppContextI } from '../context/AppContext';
 
 const SelectEvent: React.FC = () => {
 
+    const [events, setEvents] = useState([] as string[]);
 
-    const _getEvents = () => {
-        return getEvents();
+    const { setEv, ev } = useContext<AppContextI>(AppContext);
+
+    useEffect(() => {
+        _getEvents();
+    }, []);
+
+
+    const _getEvents = async () => {
+        const es: string[] = await getAllEvents();
+        setEvents(es);
     }
 
 
     const setEvent = ($event: any) => {
-        setTheEvent($event.detail.value);
+        setEv($event.detail.value);
     }
 
     return (
         <div>
+            <IonText><h3>{'Event ' + (ev ? ev : '')}</h3></IonText>
             <IonList>
                 <IonItem>
-                    <IonSelect aria-label="Events" placeholder="Select the event"  onIonChange={($event) => setEvent($event)}>
-                    {_getEvents().map((ev, i) =>
-                        <IonSelectOption value={ev.event}>{ev.event}</IonSelectOption>
-                    )}
-                </IonSelect>
-            </IonItem>
-        </IonList>
+                    <IonSelect aria-label="Events" placeholder="Select the event" onIonChange={($event) => setEvent($event)}>
+                        {events.map((ev, i) =>
+                            <IonSelectOption value={ev}>{ev}</IonSelectOption>
+                        )}
+                    </IonSelect>
+                </IonItem>
+            </IonList>
         </div >
     );
 };

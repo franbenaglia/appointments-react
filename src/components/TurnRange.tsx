@@ -10,9 +10,11 @@ import {
   IonToast
 } from '@ionic/react';
 
+interface ContainerProps {
+  id: string;
+}
 
-//const id = this.activatedRoute.snapshot.paramMap.get('_id') as string;
-const TurnRage: React.FC = ({ id }: any) => {
+const TurnRage: React.FC<ContainerProps> = ({ id }) => {
 
   const datemin = useRef<null | HTMLIonDatetimeElement>(null);
   const datemax = useRef<null | HTMLIonDatetimeElement>(null);
@@ -195,7 +197,7 @@ const TurnRage: React.FC = ({ id }: any) => {
           </IonItem>
 
           <IonItem>
-            <IonDatetime id="datemin" presentation="date" hourCycle="h23"
+            <IonDatetime id="datemin" presentation="date" hourCycle="h23" ref={datemin}
               onIonChange={() => setmin(datemin.current.value)}
               display-format="DD/MM/YYYY HH:mm" preferWheel={false} firstDayOfWeek={1}>
               <span slot="title">Select min Date</span>
@@ -213,7 +215,7 @@ const TurnRage: React.FC = ({ id }: any) => {
 
           <IonItem>
             <IonDatetime id="datemax" presentation="date" hourCycle="h23"
-              onIonChange={() => setmax(datemax.current.value)}
+              onIonChange={() => setmax(datemax.current.value)} ref={datemax}
               display-format="DD/MM/YYYY HH:mm" preferWheel={false} firstDayOfWeek={1}>
               <span slot="title">Select max Date</span>
               <IonButtons slot="buttons">
@@ -229,7 +231,7 @@ const TurnRage: React.FC = ({ id }: any) => {
           </IonItem>
 
           <IonItem>
-            <IonDatetime id="sdatetime" presentation="date" multiple={true}
+            <IonDatetime id="sdatetime" presentation="date" multiple={true} ref={sdatetime}
               onIonChange={() => setspecifics(sdatetime.current.value)} hourCycle="h23" display-format="DD/MM/YYYY HH:mm"
               preferWheel={false} firstDayOfWeek={1}>
               <span slot="title">Select the Dates</span>
@@ -263,7 +265,7 @@ const TurnRage: React.FC = ({ id }: any) => {
               <IonItem>
                 <IonSelect aria-label="Days in" placeholder="Select days in"
                   multiple={true} onIonChange={($event) => setdayvalues($event)} >
-                  {days && days.map((day, id) => <IonSelectOption value={day}>{day}</IonSelectOption>
+                  {days && days.map((day, id) => <IonSelectOption value={day} key={id}>{day}</IonSelectOption>
                   )}
                 </IonSelect>
               </IonItem>
@@ -279,9 +281,8 @@ const TurnRage: React.FC = ({ id }: any) => {
               <IonItem>
                 <IonSelect aria-label="Hours in" placeholder="Select hours in"
                   multiple={true} onIonChange={($event) => sethourvalues($event)} >
-
                   {hours && hours.map((hour, id) =>
-                    <IonSelectOption value={hour}>{hour}</IonSelectOption>
+                    <IonSelectOption value={hour} key={id}>{hour}</IonSelectOption>
                   )}
 
                 </IonSelect>
@@ -299,7 +300,7 @@ const TurnRage: React.FC = ({ id }: any) => {
                 <IonSelect aria-label="Minutes in" placeholder="Select minutess in"
                   multiple={true} onIonChange={($event) => setminutevalues($event)} >
                   {minutes && minutes.map((minute, idx) =>
-                    <IonSelectOption value={minute}>{minute}</IonSelectOption>
+                    <IonSelectOption value={minute} key={idx}>{minute}</IonSelectOption>
                   )}
                 </IonSelect>
               </IonItem>

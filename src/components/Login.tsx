@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import './Login.css';
 import { githubOauth2Login, googleOauth2Login, setTokenJwt } from '../helpers/AuthHelper';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -6,12 +6,17 @@ import { User } from '../model/user';
 import { login } from '../api/AuthApi';
 import { IonButton, IonIcon, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonToast } from '@ionic/react';
 import { logoGithub, logoGoogle } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
+import { AppContext, AppContextI } from '../context/AppContext';
 
 
 const URL_LOCAL_SERVER = import.meta.env.VITE_URL_LOCAL_SERVER;
 
 const Login: React.FC = () => {
 
+    const history = useHistory();
+
+    const { setUser } = useContext<AppContextI>(AppContext);
 
     const [showMessage, setShowMessage] = useState(false);
 
@@ -30,7 +35,7 @@ const Login: React.FC = () => {
     }
 
     const _register = () => {
-        //this.router.navigate((['folder/register']));
+        history.push('/Register')
     }
 
     const onSubmit: SubmitHandler<User> = async (user) => {
@@ -38,6 +43,7 @@ const Login: React.FC = () => {
         let u: User = Object.assign(new User(), user);
         const us = await login(u);
 
+        setUser(us);
         setTokenJwt(us.accessToken);
         window.location.assign(URL_LOCAL_SERVER);
 
@@ -61,11 +67,13 @@ const Login: React.FC = () => {
                 <form onSubmit={handleSubmit(onSubmit)}>
 
                     <IonItem>
-                        <IonInput label="Email" type="email" placeholder="email@domain.com"></IonInput>
+                        <IonInput  {...register("email", { required: true })} label="Email" type="email" placeholder="email@domain.com"></IonInput>
+                        {errors.email && <span>Email is required</span>}
                     </IonItem>
 
                     <IonItem>
-                        <IonInput label="Password" type="password" placeholder=""></IonInput>
+                        <IonInput {...register("password", { required: true })} label="Password" type="password" placeholder=""></IonInput>
+                        {errors.password && <span>Password is required</span>}
                     </IonItem>
 
                     <IonItem>

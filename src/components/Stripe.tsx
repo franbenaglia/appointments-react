@@ -7,21 +7,22 @@ import {
     useElements,
 } from '@stripe/react-stripe-js';
 import { paymentIntent } from '../api/StripeApi';
-//import { CartContext } from '../contexts/ShoppingCartContext';
 import { IonButton } from '@ionic/react';
 
-const FRONT_END_SERVER = import.meta.env.VITE_FRONT_END_SERVER;
+const FRONT_END_SERVER = import.meta.env.VITE_URL_LOCAL_SERVER;
 const URL_CLIENT = FRONT_END_SERVER + '/SuccessPayment';
 const PUBLIC_KEY_STRIPE = import.meta.env.VITE_PUBLIC_KEY_STRIPE;
 
-const CheckoutForm = () => {
+interface ContainerProps {
+    price: number;
+}
+
+const CheckoutForm: React.FC<ContainerProps> = ({ price }) => {
 
     const stripe: Stripe | null = useStripe();
     const elements = useElements();
 
     const [errorMessage, setErrorMessage] = useState(null);
-
-    //const { totalPrice } = useContext(CartContext);
 
     const handleSubmit = async (event: any) => {
         event.preventDefault();
@@ -38,9 +39,7 @@ const CheckoutForm = () => {
             return;
         }
 
-        //const amount = totalPrice();
-
-        const amount = 10;
+        const amount = price;
 
         const clientSecret = await paymentIntent(amount, 'usd');
 
@@ -89,8 +88,14 @@ const options: StripeElementsOptions = {
     },
 };
 
-export const StripeComponent = () => (
-    <Elements stripe={stripePromise} options={options}>
-        <CheckoutForm />
+
+const StripeComponent: React.FC<ContainerProps> = ({ price }) => {
+    return (<Elements stripe={stripePromise} options={options}>
+        <CheckoutForm price={price} />
     </Elements>
-);
+    );
+}
+
+
+
+export default StripeComponent;

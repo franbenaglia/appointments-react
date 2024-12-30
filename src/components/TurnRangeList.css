@@ -1,0 +1,11 @@
+.odd {
+    color: blue;
+}
+
+.even {
+    color: green;
+}
+
+ion-label {
+    --color-hover: red;
+}

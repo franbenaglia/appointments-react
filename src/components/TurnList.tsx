@@ -13,8 +13,6 @@ const TurnList: React.FC = () => {
 
   const [turns, setTurns] = useState<Turno[]>([]);
 
-  const [ts, setTs] = useState<Turno[]>([]);
-
   const [pageNumber, setPageNumber] = useState<number>(1);
 
   const [user, setUser] = useState<User>({} as User);
@@ -22,10 +20,10 @@ const TurnList: React.FC = () => {
   const [mail, setMail] = useState<string>('');
 
   const init = async () => {
-    const user = await getUser();
-    setUser(user);
-    if (user.role !== 'admin') {
-      setMail(user.email);
+    const us = await getUser();
+    setUser(us);
+    if (us.role !== 'admin') {
+      setMail(us.email);
     }
     getNextTurns();
   }
@@ -36,19 +34,28 @@ const TurnList: React.FC = () => {
 
   const getTurns = (): Turno[] => turns;
 
-  const getNextTurns = async (): Promise<void> => {
+  const getNextTurns = async (pn?: number): Promise<void> => {
 
-    const data = await getPaginatedByUser(pageNumber, pageSize, mail);
-
-    if (pageNumber === 1) {
-      turns.length = 0;
+    if (pn) {
+      pn = pageNumber;
     }
-    turns.push(...data.results);
+
+    const data = await getPaginatedByUser(pn, pageSize, mail);
+
+    if (pn === 1) {
+      //turns.length = 0;
+      setTurns(data.results);
+    } else {
+      //turns.push(...data.results);
+      //setTurns(turns);
+      setTurns(prevturns => [...prevturns, data.results]);
+    }
   }
 
   const onIonInfinite = (ev: InfiniteScrollCustomEvent) => {
-    setPageNumber(pageNumber => pageNumber + 1);
-    getNextTurns();
+    let pn = pageNumber + 1;
+    setPageNumber(pn);
+    getNextTurns(pn);
     setTimeout(() => {
       (ev as InfiniteScrollCustomEvent).target.complete();
     }, 2500);
@@ -59,7 +66,7 @@ const TurnList: React.FC = () => {
       const query = event.target.value.toLowerCase();
       setMail(query);
       setPageNumber(1);
-      getNextTurns();
+      getNextTurns(1);
     } else {
       getNextTurns();
     }
@@ -67,13 +74,12 @@ const TurnList: React.FC = () => {
 
   const handleCancel = (event: any) => {
     setPageNumber(1);
-    getNextTurns();
+    getNextTurns(1);
   }
 
 
   return (
     <div>
-
 
       <IonSearchbar placeholder="Search by email" debounce={300}
         onIonClear={($event) => handleCancel($event)}
