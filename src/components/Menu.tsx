@@ -13,8 +13,9 @@ import {
 import { useLocation } from 'react-router-dom';
 import { mailOutline, mailSharp } from 'ionicons/icons';
 import './Menu.css';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { AppContext, AppContextI } from '../context/AppContext';
+import { getUser } from '../api/UserApi';
 
 interface AppPage {
   url: string;
@@ -83,14 +84,24 @@ const appPages: AppPage[] = [
 const Menu: React.FC = () => {
   const location = useLocation();
 
-  const { user } = useContext<AppContextI>(AppContext);
+  const { setUser, user } = useContext<AppContextI>(AppContext);
+
+  const init = async () => {
+    //if (user) {
+    const us = await getUser();
+    setUser(us.data);
+    //}
+  }
+
+  useEffect(() => {
+    init()
+  }, []);
 
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Inbox</IonListHeader>
-          <IonNote>Appointment</IonNote>
+          <IonListHeader>Appointment</IonListHeader>
           <IonNote>{user ? user.email : 'anonimo'}</IonNote>
           {appPages.map((appPage, index) => {
             return (

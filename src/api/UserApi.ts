@@ -38,7 +38,7 @@ export const getUser = async () => {
 
     try {
 
-        return await axios.get<User>(baseURL + + '/profileWithJustToken', {
+        return await axios.get<User>(baseURL + '/profileWithJustToken', {
             headers: {
                 'Authorization': 'Bearer ' + token,
             }

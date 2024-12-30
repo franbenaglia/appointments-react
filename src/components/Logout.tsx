@@ -9,12 +9,15 @@ const Logout: React.FC = () => {
 
     const history = useHistory();
 
-    const _logout = () => {
-        logout();
+    const _logout = async () => {
+        await logout();
+        location.replace('/');
+        /*
         let timerId = setInterval(() => {
             clearInterval(timerId);
-            history.push('/Login')
+            history.push('/Login');
         }, interval);
+        */
 
     }
 

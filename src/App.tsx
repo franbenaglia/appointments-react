@@ -1,6 +1,6 @@
 import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route, useHistory } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 import Menu from './components/Menu';
 import Page from './pages/Page';
 
@@ -41,23 +41,31 @@ import TurnListPage from './pages/TurnListPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { AppProvider } from './context/AppContext';
-import { isLoggedIn } from './helpers/AuthHelper';
-import { useEffect, useState } from 'react';
 import SuccessPaymentPage from './pages/SuccessPaymentPage';
+import { useEffect, useState } from 'react';
+import { isLoggedIn, setGoogleJwtToken } from './helpers/AuthHelper';
+import { useCookies } from 'react-cookie';
 
 setupIonicReact();
 
 const App: React.FC = () => {
 
-  //let [renderMenu, setRenderMenu] = useState(false);
-  const history = useHistory();
+  const [renderMenu, setRenderMenu] = useState(false);
+
+  const [cookies] = useCookies(['googleJwtToken']);
 
   const logged = async () => {
-    const islog = await isLoggedIn();
-    if (!islog) {
-      history.push('/Login')
+    if (cookies.googleJwtToken) {
+      await setGoogleJwtToken(cookies.googleJwtToken)
     }
-    //setRenderMenu(islog);
+    const islog = await isLoggedIn();
+
+    if (!islog) {
+      setRenderMenu(false);
+    } else {
+      setRenderMenu(true);
+    }
+
   }
 
   useEffect(() => {
@@ -69,7 +77,7 @@ const App: React.FC = () => {
       <AppProvider>
         <IonReactRouter>
           <IonSplitPane contentId="main">
-            <Menu />
+            {renderMenu ? <Menu /> : ''}
             <IonRouterOutlet id="main">
               <Route path="/TurnListRange" exact={true}>
                 <TurnListRangePage />

@@ -2,7 +2,7 @@ import { Preferences } from "@capacitor/preferences";
 
 const URL_RESOURCE_SERVER = import.meta.env.VITE_URL_RESOURCE_SERVER;
 
-export const logout = (): void => {
+export const logout = async () => {
     removeGoogleJwtToken();
     removeTokenJwt();
     removeGoogleJwtTokenCookie();
@@ -11,7 +11,7 @@ export const logout = (): void => {
 const removeGoogleJwtTokenCookie = () => {
     //const [removeCookie] = useCookies(['googleJwtToken']);
     //removeCookie.googleJwtToken;
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "googleJwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
 
 const removeTokenJwt = async () => Preferences.remove({ key: 'tokenJwt' });
