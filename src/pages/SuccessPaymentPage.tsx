@@ -2,15 +2,11 @@ import { IonButtons, IonContent, IonHeader, IonItem, IonLabel, IonMenuButton, Io
 import './Page.css';
 import { useLocation } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
-import { useContext, useEffect } from 'react';
-import { AppContext, AppContextI } from '../context/AppContext';
+import { useEffect } from 'react';
 import { updateTurn } from '../api/TurnsApi';
 import { Turn } from '../model/turn';
 
-
-const SALE_ID = 'saleid';
-
-const CHECKOUT_LIST = 'checkoutlist';
+const TURN_ID = 'turnid';
 
 const SuccessPaymentPage: React.FC = () => {
 
@@ -19,17 +15,18 @@ const SuccessPaymentPage: React.FC = () => {
     const param1 = searchParams.get("redirect_status");
     const param2 = searchParams.get("payment_intent");
 
-    const { idTurn } = useContext<AppContextI>(AppContext);
+    //const { idTurn } = useContext<AppContextI>(AppContext);
 
     const _confirmPayment = async () => {
-        
-        console.log('turn payed: ' + idTurn);
 
         const turn: Turn = new Turn();
-        turn._id = idTurn;
+        const { value } = await Preferences.get({ key: TURN_ID });
+        console.log('turn payed: ' + value);
+        turn._id = value;
         turn.idTx = param2;
 
         updateTurn(turn);
+        Preferences.remove({ key: TURN_ID });
     }
 
     useEffect(() => {

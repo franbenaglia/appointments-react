@@ -9,10 +9,13 @@ import { sendEmail } from '../api/EmailApi';
 import { IonButton, IonItem, IonLabel } from '@ionic/react';
 import StripeComponent from './Stripe';
 import { AppContext, AppContextI } from '../context/AppContext';
+import { Preferences } from '@capacitor/preferences';
 
 interface ContainerProps {
   _id: string;
 }
+
+const TURN_ID = 'turnid';
 
 const turnPrice: number = 10;
 
@@ -46,6 +49,11 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
   }
 
   const init = async () => {
+
+    Preferences.set({
+      key: TURN_ID,
+      value: _id,
+    });
 
     const response = await getTurnById(_id);
 

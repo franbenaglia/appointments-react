@@ -27,8 +27,8 @@ interface AppPage {
 
 export enum Permission {
   admin,
-  client,
-  both,
+  user,
+  all,
 }
 
 const appPages: AppPage[] = [
@@ -46,7 +46,7 @@ const appPages: AppPage[] = [
     url: '/TurnList',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   },
 
   {
@@ -54,7 +54,7 @@ const appPages: AppPage[] = [
     url: '/TurnEdit',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   },
 
   {
@@ -62,7 +62,7 @@ const appPages: AppPage[] = [
     url: '/TurnListRange',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   },
 
   {
@@ -70,7 +70,7 @@ const appPages: AppPage[] = [
     url: '/TurnRange',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   }
   ,
   {
@@ -78,7 +78,7 @@ const appPages: AppPage[] = [
     url: '/SelectEvent',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   },
 
   {
@@ -86,7 +86,7 @@ const appPages: AppPage[] = [
     url: '/Logout',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    role: Permission.admin
+    role: Permission.all
   },
 
 ];
@@ -116,10 +116,12 @@ const Menu: React.FC = () => {
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
-                <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
-                  <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
-                  <IonLabel>{appPage.title}</IonLabel>
-                </IonItem>
+                {(user.role === appPage.role.toString() || (appPage.role === Permission.all)) ?
+                  <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
+                    <IonIcon aria-hidden="true" slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
+                    <IonLabel>{appPage.title}</IonLabel>
+                  </IonItem> : ''
+                }
               </IonMenuToggle>
             );
           })}
