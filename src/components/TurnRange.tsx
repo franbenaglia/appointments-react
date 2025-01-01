@@ -57,8 +57,8 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
   const init = async () => {
 
     if (id) {
-      const avt: AvailableRangeTurns = await getAvailableRangeTurnById(id);
-
+      const response: any = await getAvailableRangeTurnById(id);
+      const avt: AvailableRangeTurns = response.data;
       setIsDeleteButtonVisible(true);
       avt._id = id;
       setArt(avt);
@@ -91,6 +91,14 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
     datemin.current.reset();
     sdatetime.current.reset();
     setWeekends('false');
+    setDates(null);
+    setHourValues(null);
+    setMinuteValues(null);
+    setDayValues(null);
+    setValue('event', null);
+    setValue('dayValues', null);
+    setValue('hourValues', null);
+    setValue('minuteValues', null);
 
   }
 
@@ -149,6 +157,7 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
   const onSubmit: SubmitHandler<AvailableRangeTurns> = async (av) => {
 
     let t: AvailableRangeTurns = Object.assign(new AvailableRangeTurns(), av);
+
     t.specificdays.push(...dates);
     t.minDate = minDate;
     t.maxDate = maxDate;
@@ -156,11 +165,11 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
     t.dayValues = dayValues;
     t.hourValues = hourValues;
     t.minuteValues = minuteValues;
-    t._id = art._id;
+    t._id = art ? art._id : null;
 
     const avrt: any = await createOrUpdateAvailableTurns(t);
 
-    if (art._id) {
+    if (art && art._id) {
       addEvent(avrt.turnRange);
     }
 
@@ -249,7 +258,7 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
 
           <IonItem>
             <IonList>
-              <IonRadioGroup id="weekends" value="weekends" onIonChange={($event) => setweekend($event)} >
+              <IonRadioGroup id="weekends" value={weekends} onIonChange={($event) => setweekend($event)} >
                 <IonRadio value="true">Yes</IonRadio>
                 <IonRadio value="false">No</IonRadio>
               </IonRadioGroup>
@@ -263,7 +272,7 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
           <IonItem>
             <IonList>
               <IonItem>
-                <IonSelect aria-label="Days in" placeholder="Select days in"
+                <IonSelect aria-label="Days in" placeholder="Select days in" value={dayValues}
                   multiple={true} onIonChange={($event) => setdayvalues($event)} >
                   {days && days.map((day, id) => <IonSelectOption value={day} key={id}>{day}</IonSelectOption>
                   )}
@@ -279,7 +288,7 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
           <IonItem>
             <IonList>
               <IonItem>
-                <IonSelect aria-label="Hours in" placeholder="Select hours in"
+                <IonSelect aria-label="Hours in" placeholder="Select hours in" value={hourValues}
                   multiple={true} onIonChange={($event) => sethourvalues($event)} >
                   {hours && hours.map((hour, id) =>
                     <IonSelectOption value={hour} key={id}>{hour}</IonSelectOption>
@@ -297,7 +306,7 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
           <IonItem>
             <IonList>
               <IonItem>
-                <IonSelect aria-label="Minutes in" placeholder="Select minutess in"
+                <IonSelect aria-label="Minutes in" placeholder="Select minutess in" value={minuteValues}
                   multiple={true} onIonChange={($event) => setminutevalues($event)} >
                   {minutes && minutes.map((minute, idx) =>
                     <IonSelectOption value={minute} key={idx}>{minute}</IonSelectOption>

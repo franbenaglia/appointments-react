@@ -17,7 +17,8 @@ const SelectEvent: React.FC = () => {
 
 
     const _getEvents = async () => {
-        const es: string[] = await getAllEvents();
+        const response: any = await getAllEvents();
+        const es: string[] = response.data;
         setEvents(es);
     }
 
@@ -32,7 +33,7 @@ const SelectEvent: React.FC = () => {
             <IonList>
                 <IonItem>
                     <IonSelect aria-label="Events" placeholder="Select the event" onIonChange={($event) => setEvent($event)}>
-                        {events.map((ev, i) =>
+                        {events && events.length > 0 && events.map((ev, i) =>
                             <IonSelectOption value={ev}>{ev}</IonSelectOption>
                         )}
                     </IonSelect>

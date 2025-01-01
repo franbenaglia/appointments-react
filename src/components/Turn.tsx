@@ -16,14 +16,29 @@ const Turn: React.FC<ContainerProps> = ({ turn }) => {
 
     const [user, setUser] = useState({} as User);
     const [cancelVisible, setCancelVisible] = useState(true);
+    const [dat, setDat] = useState('');
+    const [hs, setHs] = useState('');
 
     const initUser = async () => {
         const u = await getUser();
         setUser(u);
     }
 
+    const initDate = async () => {
+        const dat = new Date(turn.date);
+        const year = dat.getFullYear();
+        const month = dat.getMonth() + 1;
+        const day = dat.getDate();
+        const h = dat.getHours();
+        const m = dat.getMinutes();
+        const fd = day + '/' + month + '/' + year;
+        setDat(fd);
+        setHs(h + ':' + m);
+    }
+
     useEffect(() => {
         initUser();
+        initDate();
         if (turn && (turn.cancelAdmin || turn.cancelUser)) {
             setCancelVisible(false);
         }
@@ -54,22 +69,25 @@ const Turn: React.FC<ContainerProps> = ({ turn }) => {
     }
 
     return (
+
         <div>
-            <IonItem routerLink={"'/turn-detail/' + turn._id"}>
-                <IonLabel class="ion-text-wrap">
-                    <h2>
-                        {turn.date.getUTCDay()}
-                    </h2>
-                    <h2>
-                        {turn.date.getHours()}
-                    </h2>
-                    <h3>{turn.user?.email}</h3>
-                    <h3>{turn.cancelUser ? 'Cancelled' : ''} {turn.cancelAdmin ? 'Cancelled By Admin' : ''}</h3>
-                </IonLabel>
-                {cancelVisible &&
-                    <IonButton color="danger" onClick={() => cancel()}>Cancelar</IonButton>
-                }
-            </IonItem>
+            {(turn && dat && hs) ? (
+                <IonItem routerLink={'TurnDetail/' + turn._id}>
+                    <IonLabel class="ion-text-wrap">
+                        <h2>
+                            {'Date: ' + dat}
+                        </h2>
+                        <h2>
+                            {'Time: ' + hs}
+                        </h2>
+                        <h3>{'Email: ' + turn.user?.email}</h3>
+                        <h3>{turn.cancelUser ? 'Cancelled' : ''} {turn.cancelAdmin ? 'Cancelled By Admin' : ''}</h3>
+                    </IonLabel>
+                    {cancelVisible &&
+                        <IonButton color="danger" onClick={() => cancel()}>Cancelar</IonButton>
+                    }
+                </IonItem>) : ''}
+
         </div >
     );
 };

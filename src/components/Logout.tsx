@@ -1,24 +1,12 @@
 import { IonButton } from '@ionic/react';
 import './Logout.css';
 import { logout } from '../helpers/AuthHelper';
-import { useHistory } from 'react-router-dom';
 
 const Logout: React.FC = () => {
-
-    const interval: number = 4500;
-
-    const history = useHistory();
 
     const _logout = async () => {
         await logout();
         location.replace('/');
-        /*
-        let timerId = setInterval(() => {
-            clearInterval(timerId);
-            history.push('/Login');
-        }, interval);
-        */
-
     }
 
     return (

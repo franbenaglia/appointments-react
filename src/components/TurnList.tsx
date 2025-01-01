@@ -20,7 +20,8 @@ const TurnList: React.FC = () => {
   const [mail, setMail] = useState<string>('');
 
   const init = async () => {
-    const us = await getUser();
+    const use = await getUser();
+    const us = use.data;
     setUser(us);
     if (us.role !== 'admin') {
       setMail(us.email);
@@ -38,17 +39,19 @@ const TurnList: React.FC = () => {
 
     if (pn) {
       pn = pageNumber;
+    } else {
+      pn = 1;
     }
 
     const data = await getPaginatedByUser(pn, pageSize, mail);
 
     if (pn === 1) {
       //turns.length = 0;
-      setTurns(data.results);
+      setTurns(data.data.results);
     } else {
       //turns.push(...data.results);
       //setTurns(turns);
-      setTurns(prevturns => [...prevturns, data.results]);
+      setTurns(prevturns => [...prevturns, data.data.results]);
     }
   }
 
@@ -90,7 +93,7 @@ const TurnList: React.FC = () => {
       </IonSearchbar>
 
       <IonList>
-        {getTurns().map((turn, idx) => <Turn turn={turn} key={idx} />
+        {getTurns().length > 0 && getTurns().map((turn, idx) => <Turn turn={turn} key={idx} />
         )
         }
       </IonList>

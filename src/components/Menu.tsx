@@ -32,23 +32,17 @@ export enum Permission {
 }
 
 const appPages: AppPage[] = [
+  /*
+   {
+     title: 'Inbox',
+     url: '/folder/Inbox',
+     iosIcon: mailOutline,
+     mdIcon: mailSharp,
+     role: Permission.admin
+   },
+ */
   {
-    title: 'Inbox',
-    url: '/folder/Inbox',
-    iosIcon: mailOutline,
-    mdIcon: mailSharp,
-    role: Permission.admin
-  },
-  {
-    title: 'Logout',
-    url: '/Logout',
-    iosIcon: mailOutline,
-    mdIcon: mailSharp,
-    role: Permission.admin
-  },
-
-  {
-    title: 'TurnList',
+    title: 'Turn List',
     url: '/TurnList',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
@@ -56,7 +50,7 @@ const appPages: AppPage[] = [
   },
 
   {
-    title: 'TurnEdit',
+    title: 'New Turn',
     url: '/TurnEdit',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
@@ -64,16 +58,32 @@ const appPages: AppPage[] = [
   },
 
   {
-    title: 'TurnRangeList',
-    url: '/TurnRangeList',
+    title: 'Turn Range List',
+    url: '/TurnListRange',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
     role: Permission.admin
   },
 
   {
-    title: 'TurnRange',
+    title: 'New Turn Range',
     url: '/TurnRange',
+    iosIcon: mailOutline,
+    mdIcon: mailSharp,
+    role: Permission.admin
+  }
+  ,
+  {
+    title: 'Select Event',
+    url: '/SelectEvent',
+    iosIcon: mailOutline,
+    mdIcon: mailSharp,
+    role: Permission.admin
+  },
+
+  {
+    title: 'Logout',
+    url: '/Logout',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
     role: Permission.admin
@@ -101,8 +111,8 @@ const Menu: React.FC = () => {
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Appointment</IonListHeader>
-          <IonNote>{user ? user.email : 'anonimo'}</IonNote>
+          <IonListHeader>Appointments</IonListHeader>
+          <IonNote>{'User: ' + (user ? user.email : 'anonimo')}</IonNote>
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>

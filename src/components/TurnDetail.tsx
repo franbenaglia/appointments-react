@@ -18,11 +18,14 @@ const turnPrice: number = 10;
 
 const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
-  const [turn, setTurn] = useState<Turn>({} as Turn);
+  const [turn, setTurn] = useState<Turn>(null);
 
   const [cancelDisabled, setCancelDisabled] = useState<boolean>(false);
 
   const [user, setUser] = useState<User>({} as User);
+
+  const [dat, setDat] = useState('');
+  const [hs, setHs] = useState('');
 
   const { setIdTurn } = useContext<AppContextI>(AppContext);
 
@@ -30,9 +33,23 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
     init();
   }, []);
 
+  const initDate = async (t: Turn) => {
+    const dat = new Date(t.date);
+    const year = dat.getFullYear();
+    const month = dat.getMonth() + 1;
+    const day = dat.getDate();
+    const h = dat.getHours();
+    const m = dat.getMinutes();
+    const fd = day + '/' + month + '/' + year;
+    setDat(fd);
+    setHs(h + ':' + m);
+  }
+
   const init = async () => {
 
-    const t = await getTurnById(_id);
+    const response = await getTurnById(_id);
+
+    const t = response.data;
 
     setIdTurn(_id);
 
@@ -44,6 +61,7 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
     const us = await getUser();
     setUser(us);
+    initDate(t);
   }
 
   const cancel = async () => {
@@ -75,42 +93,38 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
   return (
     <div>
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {turn.date.toISOString()}
-        </IonLabel>
-      </IonItem>
-
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {turn.date.toISOString()}
-        </IonLabel>
-      </IonItem>
-
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {turn.user.email}
-        </IonLabel>
-      </IonItem>
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {turn.user.lastName}
-        </IonLabel>
-      </IonItem>
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {turn.cancelUser ? 'Cancelled' : ''} {turn.cancelAdmin ? 'Cancelled By Admin' : ''}
-        </IonLabel>
-      </IonItem>
-      <IonItem>
-        <IonLabel class="ion-text-wrap">
-          {'Tx: ' + turn.idTx}
-        </IonLabel>
-      </IonItem>
-      <IonItem>
-        <StripeComponent price={turnPrice} />
-      </IonItem>
-      <IonButton disabled={cancelDisabled} color="danger" onClick={() => cancel()}>Cancelar</IonButton>
+      {turn ? (
+        <>
+          <IonItem>
+            <IonLabel class="ion-text-wrap">
+              {'Date: ' + dat}
+            </IonLabel>
+          </IonItem><IonItem>
+            <IonLabel class="ion-text-wrap">
+              {'Time: ' + hs}
+            </IonLabel>
+          </IonItem><IonItem>
+            <IonLabel class="ion-text-wrap">
+              {turn.user.email}
+            </IonLabel>
+          </IonItem><IonItem>
+            <IonLabel class="ion-text-wrap">
+              {turn.user.lastName}
+            </IonLabel>
+          </IonItem><IonItem>
+            <IonLabel class="ion-text-wrap">
+              {turn.cancelUser ? 'Cancelled' : ''} {turn.cancelAdmin ? 'Cancelled By Admin' : ''}
+            </IonLabel>
+          </IonItem><IonItem>
+            <IonLabel class="ion-text-wrap">
+              {'Tx: ' + turn.idTx}
+            </IonLabel>
+          </IonItem>
+          <IonItem>
+            <StripeComponent price={turnPrice} />
+          </IonItem><IonButton disabled={cancelDisabled} color="danger" onClick={() => cancel()}>Cancelar</IonButton>
+        </>
+      ) : ''}
     </div >
   );
 };

@@ -16,12 +16,12 @@ const TurnRangeList: React.FC = () => {
 
     const init = async () => {
         const eves = await getAvailableRangeTurns();
-        setEvs(eves);
+        setEvs(eves.data);
     }
 
     return (
         <div>
-            {evs && evs.map((event, idx) => {
+            {evs && evs.length>0 && evs.map((event, idx) => {
                 let sty = (idx % 2 == 0) ? { color: 'blue' } : { color: 'green' };
                 return (
                     <IonList inset={true}>

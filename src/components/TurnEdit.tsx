@@ -47,27 +47,31 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
 
   useEffect(() => {
     init();
-  }, []);
+  }, [ev]);
 
   const init = async () => {
 
-    const eve: string[] = await getAllEvents();
-    setEvents(eve);
+    const eve = await getAllEvents();
+    setEvents(eve.data);
 
-    const us: User = await getUser();
-    setUser(us);
+    const us = await getUser();
+    setUser(us.data);
 
-    const av: AvailableDates = await getAvailableTurnsWithSelectedDates(ev);
-
-    setDayValues(av.range[0].dayValues);
-    setMinDate(av.range[0].minDate);
-    setMaxDate(av.range[0].maxDate);
-    setHourValues(av.range[0].hourValues);
-    setMinuteValues(av.range[0].minuteValues);
-    setWeekends(av.range[0].weekends);
-    setSpecificdays(av.range[0].specificdays);
-    setSelectedDays(av.datesUsed.map(s => s && s.substring(0, 10)));
-    addSpecificDays();
+    if (ev) {
+      const av = await getAvailableTurnsWithSelectedDates(ev);
+      setDayValues(av.data.range[0].dayValues);
+      const mind = av.data.range[0].minDate;
+      setMinDate(mind);
+      const maxd = av.data.range[0].maxDate;
+      setMaxDate(maxd);
+      setHourValues(av.data.range[0].hourValues);
+      setMinuteValues(av.data.range[0].minuteValues);
+      setWeekends(av.data.range[0].weekends);
+      const sd = av.data.range[0].specificdays
+      setSpecificdays(sd);
+      setSelectedDays(av.data.datesUsed.map(s => s && s.substring(0, 10)));
+      addSpecificDays(sd, mind, maxd);
+    }
 
     setCurrentDate(new Date().toISOString());
 
@@ -78,13 +82,15 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
   }
 
   const fetchTurn = async () => {
-    const data : Turn = await getTurnById(id);
+    const data: Turn = await getTurnById(id);
     setValue('date', data.date);
     setValue('event', data.event);
   }
 
 
   const datetime = useRef<null | HTMLIonDatetimeElement>(null);
+
+  const datetimex = useRef<null | HTMLIonDatetimeElement>(null);
 
   const reset = () => {
     datetime.current?.reset();
@@ -96,6 +102,10 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
 
   const confirm = () => {
     datetime.current?.confirm();
+  };
+
+  const confirmx = () => {
+    datetimex.current?.confirm();
   };
 
   const onSubmit: SubmitHandler<Turn> = async (turn) => {
@@ -125,7 +135,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
   const isDateEnabled = (dateString: string) => enableDate && dateAvailable(dateString) && invalidDate(dateString) &&
     weekendsf(dateString);
 
-
+  //const isDateEnabled = (dateString: string) => true;
 
   const settimevalues = ($event: IonSelectCustomEvent<SelectChangeEventDetail<any>>) => {
     setTimeSelected($event.detail.value)
@@ -142,19 +152,20 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
     return utcDay !== 0 && utcDay !== 6
   }
 
-  const addSpecificDays = () => {
+  const addSpecificDays = (spd: string[], mind: string, maxd: string) => {
 
-    let days: number[] = specificdays.map(s => Math.abs(+s.substring(7)))
+    let days: number[] = spd.map(s => Math.abs(+s.substring(7)))
     dayValues.push(...days);
     setDayValues(dayValues);
-    excludingDays(days); //workaround
+    //setDayValues(prev => [...prev, ...days]);
+    excludingDays(days, spd, mind, maxd); //workaround
 
   }
 
-  const excludingDays = (days: number[]) => {
+  const excludingDays = (days: number[], spd: string[], mind: string, maxd: string) => {
 
-    let lowEnd: number = +minDate.substring(5, 7);
-    let highEnd: number = +maxDate.substring(5, 7);
+    let lowEnd: number = +mind.substring(5, 7);
+    let highEnd: number = +maxd.substring(5, 7);
     let months: number[] = [];
     let year: number = 2024;
     let allDates: string[] = [];
@@ -170,12 +181,12 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
         allDates.push(year.toString() + '-' + month + '-' + day);
       }
     }
-    cutSpecificDays(allDates);
+    cutSpecificDays(allDates, spd);
   }
 
-  const cutSpecificDays = (allDates: string[]) => {
+  const cutSpecificDays = (allDates: string[], spd: string[]) => {
     let notValidDates: string[] = allDates.filter(d => {
-      return specificdays.indexOf(d) === -1;
+      return spd.indexOf(d) === -1;
     });
     invalidDays.push(...notValidDates);
     setInvalidDays(invalidDays);
@@ -195,7 +206,9 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
 
     let sdate: string | string[] = datetime.current?.value;
 
-    const av: AvailableDates = await getAvailableTurnsTimes(ev, sdate as string);
+    const response: any = await getAvailableTurnsTimes(ev, sdate as string);
+
+    const av: AvailableDates = response.data;
 
     setHourValues(av.range[0].hourValues);
     setMinuteValues(av.range[0].minuteValues);
@@ -230,7 +243,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
               <IonSelect aria-label="Events" placeholder="Select the event"
                 onIonChange={($event) => setEvent($event)}>
 
-                {events.map((ev, i) =>
+                {events && events.length > 0 && events.map((ev, i) =>
                   <IonSelectOption value={ev}>{ev}</IonSelectOption>
                 )
                 }
@@ -264,20 +277,20 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
           </IonItem>
 
           <IonItem>
-
-            <IonDatetime id="datetime" presentation='date' dayValues={dayValues} ref={datetime}
-              isDateEnabled={isDateEnabled} min={minDate} max={maxDate} value={currentDate}
-              onIonChange={() => handleChange()}
-              onIonCancel={() => handleCancel()} display-format="DD/MM/YYYY"
-              firstDayOfWeek={1}>
-              <span slot="title">Select a Reservation Date</span>
-              <IonButtons slot="buttons">
-                <IonButton color="danger" onClick={reset}>Reset</IonButton>
-                <IonButton color="success" onClick={confirm}>Confirm</IonButton>
-                <IonButton color="warning" onClick={cancel}>Cancel</IonButton >
-              </IonButtons >
-            </IonDatetime >
-
+            {(dayValues && dayValues.length > 0) &&
+              <IonDatetime id="datetime2" presentation='date' ref={datetime} dayValues={dayValues}
+                isDateEnabled={isDateEnabled} min={minDate} max={maxDate}
+                onIonChange={() => handleChange()}
+                onIonCancel={() => handleCancel()} display-format="DD/MM/YYYY"
+                firstDayOfWeek={1}>
+                <span slot="title">Select a Reservation Date</span>
+                <IonButtons slot="buttons">
+                  <IonButton color="danger" onClick={reset}>Reset</IonButton>
+                  <IonButton color="success" onClick={confirm}>Confirm</IonButton>
+                  <IonButton color="warning" onClick={cancel}>Cancel</IonButton >
+                </IonButtons >
+              </IonDatetime >
+            }
           </IonItem >
 
           {showTime ?
@@ -286,7 +299,7 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
                 <IonItem>
                   <IonSelect aria-label="Avaliable times" placeholder="Select time"
                     onIonChange={($event) => settimevalues($event)} >
-                    {timeFree.map((time, i) =>
+                    {timeFree && timeFree.map((time, i) =>
                       <IonSelectOption value={time}>{time}</IonSelectOption>
                     )
                     }
