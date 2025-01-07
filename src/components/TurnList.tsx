@@ -9,7 +9,7 @@ import Turn from './Turn';
 
 const TurnList: React.FC = () => {
 
-  const pageSize: number = 5;
+  const pageSize: number = 10;
 
   const [turns, setTurns] = useState<Turno[]>([]);
 
@@ -49,9 +49,9 @@ const TurnList: React.FC = () => {
       //turns.length = 0;
       setTurns(data.data.results);
     } else {
-      //turns.push(...data.results);
-      //setTurns(turns);
-      setTurns(prevturns => [...prevturns, data.data.results]);
+      turns.push(...data.data.results);
+      setTurns(turns);
+      //setTurns(prevturns => [...prevturns, data.data.results]);
     }
   }
 
