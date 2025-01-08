@@ -39,7 +39,7 @@ const Turn: React.FC<ContainerProps> = ({ turn }) => {
     useEffect(() => {
         initUser();
         initDate();
-        if (turn && (turn.cancelAdmin || turn.cancelUser)) {
+        if (turn && (turn.cancelAdmin || turn.cancelUser || turn.idTx)) {
             setCancelVisible(false);
         }
     }, []);

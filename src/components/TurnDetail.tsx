@@ -24,6 +24,7 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
   const [turn, setTurn] = useState<Turn>(null);
 
   const [cancelDisabled, setCancelDisabled] = useState<boolean>(false);
+  const [disablePay, setDisablePay] = useState<boolean>(false);
 
   const [user, setUser] = useState<User>({} as User);
 
@@ -65,6 +66,7 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
 
     if (t.cancelAdmin || t.cancelUser || t.idTx) {
       setCancelDisabled(true);
+      setDisablePay(true);
     }
 
     const us = await getUser();
@@ -81,8 +83,9 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
     }
 
     await updateTurn(turn);
-
+    
     setCancelDisabled(true);
+    setDisablePay(true);
 
     if (user.role === 'admin') {
 
@@ -129,7 +132,7 @@ const TurnDetail: React.FC<ContainerProps> = ({ _id }) => {
             </IonLabel>
           </IonItem>
           <IonItem>
-            <StripeComponent price={turnPrice} />
+            <StripeComponent price={turnPrice} disablePay={disablePay} />
           </IonItem><IonButton disabled={cancelDisabled} color="danger" onClick={() => cancel()}>Cancelar</IonButton>
         </>
       ) : ''}

@@ -15,9 +15,10 @@ const PUBLIC_KEY_STRIPE = import.meta.env.VITE_PUBLIC_KEY_STRIPE;
 
 interface ContainerProps {
     price: number;
+    disablePay: boolean;
 }
 
-const CheckoutForm: React.FC<ContainerProps> = ({ price }) => {
+const CheckoutForm: React.FC<ContainerProps> = ({ price, disablePay }) => {
 
     const stripe: Stripe | null = useStripe();
     const elements = useElements();
@@ -67,9 +68,9 @@ const CheckoutForm: React.FC<ContainerProps> = ({ price }) => {
     return (
         <form onSubmit={handleSubmit}>
             <PaymentElement />
-            <IonButton size="default" type="submit" disabled={!stripe || !elements}>
+            {!disablePay ? <IonButton size="default" type="submit" disabled={!stripe || !elements}>
                 PAY
-            </IonButton>
+            </IonButton> : ''}
             {/* Show error message to your customers */}
             {errorMessage && <div>{errorMessage}</div>}
         </form>
@@ -89,9 +90,9 @@ const options: StripeElementsOptions = {
 };
 
 
-const StripeComponent: React.FC<ContainerProps> = ({ price }) => {
+const StripeComponent: React.FC<ContainerProps> = ({ price, disablePay }) => {
     return (<Elements stripe={stripePromise} options={options}>
-        <CheckoutForm price={price} />
+        <CheckoutForm price={price} disablePay={disablePay} />
     </Elements>
     );
 }
