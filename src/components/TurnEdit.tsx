@@ -120,7 +120,16 @@ const TurnEdit: React.FC<ContainerProps> = ({ id }) => {
 
     turn.date = new Date(stimedate);
 
-    await addTurn(turn);
+    const response = await addTurn(turn);
+
+    setIsToastOpen(true);
+
+    if (response.status === 200) {
+      setMessage('Successful, Turn accepted');
+    } else {
+      setMessage('Error, turn not accepted. Try again');
+      console.log(response.response.data.message);
+    }
 
   }
 

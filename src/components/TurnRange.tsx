@@ -173,13 +173,16 @@ const TurnRage: React.FC<ContainerProps> = ({ id }) => {
       addEvent(avrt.turnRange);
     }
 
-    setMessage('Success! Range Turn accepted.');
-    clearForm();
     setOpen(true);
 
-    //setOpen(true);
-    //message = 'Submit fail';
-    //console.log(error);
+    if (avrt.status === 200) {
+      setMessage('Success! Range Turn accepted.');
+      clearForm();
+    } else {
+      setMessage('Error, turn range not accepted. Try again.');
+      console.log(avrt.response.data.message);
+    }
+
   }
 
 
