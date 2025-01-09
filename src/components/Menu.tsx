@@ -16,6 +16,7 @@ import './Menu.css';
 import { useContext, useEffect } from 'react';
 import { AppContext, AppContextI } from '../context/AppContext';
 import { getUser } from '../api/UserApi';
+import { logout } from '../helpers/AuthHelper';
 
 interface AppPage {
   url: string;
@@ -97,10 +98,16 @@ const Menu: React.FC = () => {
   const { setUser, user } = useContext<AppContextI>(AppContext);
 
   const init = async () => {
-    //if (user) {
+
     const us = await getUser();
+
     setUser(us.data);
-    //}
+
+    if (us.response.status === 401) {
+      await logout();
+      window.location.replace('/');
+    }
+
   }
 
   useEffect(() => {
